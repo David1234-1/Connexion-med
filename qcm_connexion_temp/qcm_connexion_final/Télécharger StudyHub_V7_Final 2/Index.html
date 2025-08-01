@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connexion Firebase Simple</title>
+</head>
+<body>
+
+  <h1>StudyHub - Connexion / Inscription</h1>
+
+  <div id="user-info" style="display:none;">
+    <p>Connecté en tant que <span id="user-email"></span></p>
+    <button id="logout-btn">Déconnexion</button>
+  </div>
+
+  <div id="auth-forms">
+    <h2>Inscription</h2>
+    <form id="signup-form">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Mot de passe" required />
+      <button type="submit">S'inscrire</button>
+    </form>
+
+    <h2>Connexion</h2>
+    <form id="login-form">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Mot de passe" required />
+      <button type="submit">Se connecter</button>
+    </form>
+
+    <button id="google-login-btn">Se connecter avec Google</button>
+  </div>
+
+  <script src="config.js"></script>
+  <script type="module" src="auth.js"></script>
+
+  <script type="module">
+    import { signup, login, logout, loginWithGoogle, onUserStateChange } from './auth.js';
+
+    const signupForm = document.getElementById('signup-form');
+    const loginForm = document.getElementById('login-form');
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    const userInfo = document.getElementById('user-info');
+    const authForms = document.getElementById('auth-forms');
+    const userEmailSpan = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    signupForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = signupForm.email.value;
+      const password = signupForm.password.value;
+      try {
+        await signup(email, password);
+        alert("Inscription réussie !");
+        signupForm.reset();
+      } catch (err) {
+        alert("Erreur inscription : " + err.message);
+      }
+    });
+
+    loginForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = loginForm.email.value;
+      const password = loginForm.password.value;
+      try {
+        await login(email, password);
+        alert("Connexion réussie !");
+        loginForm.reset();
+      } catch (err) {
+        alert("Erreur connexion : " + err.message);
+      }
+    });
+
+    googleLoginBtn.addEventListener('click', async () => {
+      try {
+        await loginWithGoogle();
+      } catch (err) {
+        alert("Erreur connexion Google : " + err.message);
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await logout();
+      } catch (err) {
+        alert("Erreur déconnexion : " + err.message);
+      }
+    });
+
+    onUserStateChange(user => {
+      if (user) {
+        userInfo.style.display = "block";
+        authForms.style.display = "none";
+        userEmailSpan.textContent = user.email;
+      } else {
+        userInfo.style.display = "none";
+        authForms.style.display = "block";
+        userEmailSpan.textContent = "";
+      }
+    });
+  </script>
+
+</body>
+</html>
